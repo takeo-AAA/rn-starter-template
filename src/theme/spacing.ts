@@ -15,3 +15,11 @@ export const borderRadius = {
   xl: 16,
   full: 9999,
 } as const;
+
+export const opacity = {
+  disabled: 0.5,
+  active: 1,
+  pressed: 0.7,
+} as const;
+
+export const minTouchTarget = spacing.xxxl;

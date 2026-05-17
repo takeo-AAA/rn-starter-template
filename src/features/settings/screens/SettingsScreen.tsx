@@ -5,7 +5,7 @@ import { Text, Button, Card } from '@/components/ui';
 import { useTheme } from '@/hooks/use-theme';
 import { useThemeStore } from '@/stores/theme.store';
 import { spacing } from '@/theme/spacing';
-import { useAuth } from '@/features/auth/hooks/use-auth';
+import { useAuth } from '@/hooks/use-auth';
 
 export const SettingsScreen = (): React.JSX.Element => {
   const { colors, isDark } = useTheme();

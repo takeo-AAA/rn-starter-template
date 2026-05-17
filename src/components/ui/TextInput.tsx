@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { TextInput as RNTextInput, View, StyleSheet, type TextInputProps } from 'react-native';
 import { useTheme } from '@/hooks/use-theme';
-import { spacing, borderRadius } from '@/theme/spacing';
+import { spacing, borderRadius, minTouchTarget } from '@/theme/spacing';
 import { typography } from '@/theme/typography';
 import { Text } from './Text';
 
@@ -60,7 +60,7 @@ const styles = StyleSheet.create({
     borderRadius: borderRadius.md,
     paddingVertical: spacing.md,
     paddingHorizontal: spacing.lg,
-    minHeight: 48,
+    minHeight: minTouchTarget,
   },
   error: {
     marginTop: 2,

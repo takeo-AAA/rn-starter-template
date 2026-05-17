@@ -7,7 +7,7 @@ import {
   type ViewStyle,
 } from 'react-native';
 import { useTheme } from '@/hooks/use-theme';
-import { spacing, borderRadius } from '@/theme/spacing';
+import { spacing, borderRadius, opacity, minTouchTarget } from '@/theme/spacing';
 import { typography } from '@/theme/typography';
 import { Text } from './Text';
 
@@ -36,7 +36,7 @@ export const Button = ({
     backgroundColor: variant === 'primary' ? colors.primary : colors.transparent,
     borderWidth: variant === 'outline' ? 1 : 0,
     borderColor: variant === 'outline' ? colors.primary : colors.transparent,
-    opacity: isDisabled ? 0.5 : 1,
+    opacity: isDisabled ? opacity.disabled : opacity.active,
     alignSelf: fullWidth ? 'stretch' : 'auto',
   };
 
@@ -46,7 +46,7 @@ export const Button = ({
     <TouchableOpacity
       style={[styles.base, containerStyle, style]}
       disabled={isDisabled}
-      activeOpacity={0.7}
+      activeOpacity={opacity.pressed}
       {...props}
     >
       {isLoading ? (
@@ -67,7 +67,7 @@ const styles = StyleSheet.create({
     borderRadius: borderRadius.md,
     alignItems: 'center',
     justifyContent: 'center',
-    minHeight: 48,
+    minHeight: minTouchTarget,
   },
   label: {
     fontWeight: typography.fontWeight.semibold,
