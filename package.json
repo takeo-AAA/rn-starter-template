@@ -73,6 +73,15 @@
     "node": ">= 22.11.0"
   },
   "jest": {
-    "preset": "@react-native/jest-preset"
+    "preset": "@react-native/jest-preset",
+    "setupFiles": [
+      "react-native-gesture-handler/jestSetup"
+    ],
+    "moduleNameMapper": {
+      "react-native-mmkv": "<rootDir>/__mocks__/react-native-mmkv.js"
+    },
+    "transformIgnorePatterns": [
+      "node_modules/(?!((jest-)?react-native|@react-native(-community)?|@react-navigation|react-native-gesture-handler|react-native-safe-area-context|react-native-screens|react-native-nitro-modules|@tanstack|zustand)/)"
+    ]
   }
 }
