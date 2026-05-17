@@ -7,7 +7,10 @@ type Props = {
   size?: 'small' | 'large';
 };
 
-export const LoadingSpinner = ({ fullScreen = false, size = 'large' }: Props): React.JSX.Element => {
+export const LoadingSpinner = ({
+  fullScreen = false,
+  size = 'large',
+}: Props): React.JSX.Element => {
   const { colors } = useTheme();
 
   if (fullScreen) {

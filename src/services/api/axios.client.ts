@@ -1,8 +1,4 @@
-import axios, {
-  type InternalAxiosRequestConfig,
-  type AxiosInstance,
-  type AxiosError,
-} from 'axios';
+import axios, { type InternalAxiosRequestConfig, type AxiosInstance, type AxiosError } from 'axios';
 import { storage, StorageKeys } from '@/utils/storage';
 import { logger } from '@/utils/logger';
 import type { ApiError } from './api.types';

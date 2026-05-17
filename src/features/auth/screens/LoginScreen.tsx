@@ -22,10 +22,7 @@ export const LoginScreen = (): React.JSX.Element => {
         style={styles.flex}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
-        <ScrollView
-          contentContainerStyle={styles.content}
-          keyboardShouldPersistTaps="handled"
-        >
+        <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
           <View style={styles.header}>
             <Text variant="h1">ログイン</Text>
             <Text variant="body" color={colors.textSecondary}>

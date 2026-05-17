@@ -51,12 +51,7 @@ export const LoginForm = ({ onSubmit, isLoading }: Props): React.JSX.Element => 
           />
         )}
       />
-      <Button
-        title="ログイン"
-        onPress={handleSubmit(onSubmit)}
-        isLoading={isLoading}
-        fullWidth
-      />
+      <Button title="ログイン" onPress={handleSubmit(onSubmit)} isLoading={isLoading} fullWidth />
     </View>
   );
 };

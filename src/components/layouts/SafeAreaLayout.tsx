@@ -16,7 +16,10 @@ export const SafeAreaLayout = ({
 }: Props): React.JSX.Element => {
   const { colors } = useTheme();
   return (
-    <SafeAreaView style={[styles.base, { backgroundColor: colors.background }, style]} edges={edges}>
+    <SafeAreaView
+      style={[styles.base, { backgroundColor: colors.background }, style]}
+      edges={edges}
+    >
       {children}
     </SafeAreaView>
   );

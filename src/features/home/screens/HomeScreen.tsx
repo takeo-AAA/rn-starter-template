@@ -25,10 +25,7 @@ export const HomeScreen = (): React.JSX.Element => {
   const { colors } = useTheme();
   const { data: posts, isLoading, isError, refetch } = useHomeData();
 
-  const renderItem: ListRenderItem<Post> = useCallback(
-    ({ item }) => <PostCard post={item} />,
-    [],
-  );
+  const renderItem: ListRenderItem<Post> = useCallback(({ item }) => <PostCard post={item} />, []);
 
   const keyExtractor = useCallback((item: Post): string => item.id, []);
 

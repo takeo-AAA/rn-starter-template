@@ -12,8 +12,7 @@ export const useTheme = (): UseThemeReturn => {
   const systemScheme = useColorScheme();
   const { mode } = useThemeStore();
 
-  const isDark =
-    mode === 'dark' || (mode === 'system' && systemScheme === 'dark');
+  const isDark = mode === 'dark' || (mode === 'system' && systemScheme === 'dark');
 
   return {
     colors: isDark ? darkColors : lightColors,

@@ -33,16 +33,14 @@ export const Button = ({
   const isDisabled = disabled || isLoading;
 
   const containerStyle: ViewStyle = {
-    backgroundColor:
-      variant === 'primary' ? colors.primary : colors.transparent,
+    backgroundColor: variant === 'primary' ? colors.primary : colors.transparent,
     borderWidth: variant === 'outline' ? 1 : 0,
     borderColor: variant === 'outline' ? colors.primary : colors.transparent,
     opacity: isDisabled ? 0.5 : 1,
     alignSelf: fullWidth ? 'stretch' : 'auto',
   };
 
-  const textColor =
-    variant === 'primary' ? colors.textInverse : colors.primary;
+  const textColor = variant === 'primary' ? colors.textInverse : colors.primary;
 
   return (
     <TouchableOpacity
