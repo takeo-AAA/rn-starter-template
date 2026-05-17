@@ -1,6 +1,14 @@
 {
-  "name": "RNStarterTemplate",
+  "name": "rn-starter-template",
   "version": "1.0.0",
+  "description": "Production-ready React Native 0.85.3 starter template. New Architecture enabled. TypeScript strict mode. Auth, navigation, API client, MMKV storage, TanStack Query, Zustand, React Hook Form + Zod.",
+  "author": "Takeshi Tanaka",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/takeo-AAA/rn-starter-template.git"
+  },
+  "homepage": "https://github.com/takeo-AAA/rn-starter-template#readme",
   "private": true,
   "scripts": {
     "android": "react-native run-android",
@@ -13,7 +21,7 @@
     "format:check": "prettier --check \"src/**/*.{ts,tsx}\"",
     "test": "jest",
     "test:watch": "jest --watch",
-    "validate": "yarn type-check && yarn lint && yarn format:check"
+    "validate": "npm run type-check && npm run lint && npm run format:check"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",

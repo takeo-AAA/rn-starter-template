@@ -7,7 +7,7 @@ module.exports = {
   ],
   plugins: ['import'],
   rules: {
-    'import/no-cycle': ['error', {ignoreExternal: true}],
+    'import/no-cycle': ['error', {ignoreExternal: true, ignoreTypeImports: true}],
     'import/no-default-export': 'error',
     // Disabled: TypeScript handles these; RN's Flow-typed index.js breaks import/namespace
     'import/namespace': 'off',
