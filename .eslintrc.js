@@ -9,6 +9,19 @@ module.exports = {
   rules: {
     'import/no-cycle': ['error', {ignoreExternal: true}],
     'import/no-default-export': 'error',
+    'import/no-restricted-paths': [
+      'error',
+      {
+        zones: [
+          {
+            target: './src/features/*/screens',
+            from: './src/features/*/repositories',
+            message:
+              'Screens must not import repositories directly. Use hooks instead.',
+          },
+        ],
+      },
+    ],
     // Disabled: TypeScript handles these; RN's Flow-typed index.js breaks import/namespace
     'import/namespace': 'off',
     'import/no-unresolved': 'off',
