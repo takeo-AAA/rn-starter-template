@@ -1,0 +1,168 @@
+---
+description: Enforced architecture and layer rules for this bare React Native CLI starter. Read before generating or editing any code under src/.
+globs:
+  - "src/**/*.ts"
+  - "src/**/*.tsx"
+alwaysApply: true
+---
+
+# RN Starter Template — Architecture Rules
+
+This is a **bare React Native CLI** project (no Expo). New Architecture (Fabric + TurboModules + JSI) is enabled by default. The rules below are derived **only** from this repository's `.eslintrc.js`, `tsconfig.json`, and actual `src/` structure — do not invent rules.
+
+Two tiers:
+
+- **強制 (Enforced):** fails `npm run lint` or `npm run type-check`, which is a CI failure. Never produce code that violates these.
+- **推奨 (Convention):** the established pattern in this codebase. Follow it unless explicitly told otherwise. Some are `warn`-level lint rules; treat them as required by convention.
+
+---
+
+## 強制 — ESLint errors (`.eslintrc.js`)
+
+1. **No default exports.** `import/no-default-export` is `error`. Every module uses **named exports only**.
+   - `export const LoginScreen = (): React.JSX.Element => { ... }` — not `export default`.
+   - The single allowed exception in the ecosystem is RN's own entry files; do not add default exports to `src/`.
+
+2. **No circular imports.** `import/no-cycle` is `error` (`ignoreExternal: true`). Runtime import cycles fail lint.
+   - **`import type` does not count** as a runtime dependency, so cross-layer type imports are fine. Prefer `import type` when you only need a type.
+
+3. **No `any`.** `@typescript-eslint/no-explicit-any` is `error`. Use `unknown` and narrow, or define a precise type. Repositories return precise domain types (`Promise<Post[]>`, `Promise<LoginResponse>`).
+
+4. **Type-only imports must use `import type`.** `@typescript-eslint/consistent-type-imports` is `error`.
+   - `import type { ApiResponse } from '@/services/api/api.types';`
+   - Mixed value+type: `import axios, { type AxiosInstance } from 'axios';`
+
+5. **Screens must NOT import repositories.** `import/no-restricted-paths` blocks `src/features/*/screens` from importing `src/features/*/repositories`.
+   - A screen reaches data **only through a hook**. If you write `import { authRepository } from '../repositories/...'` inside a screen, lint fails with: *"Screens must not import repositories directly. Use hooks instead."*
+
+---
+
+## 強制 — TypeScript (`tsconfig.json`)
+
+`tsc --noEmit` must report **0 errors**. Active flags:
+
+- `strict: true`, `noImplicitAny: true`, `strictNullChecks: true`
+- `noUnusedLocals: true`, `noUnusedParameters: true`, `noImplicitReturns: true`
+
+Implications when generating code:
+
+- No unused imports, variables, or parameters. Prefix intentionally-unused params with `_` only if the type signature forces them.
+- Handle `string | undefined` from storage reads — `storage.getString()` returns `string | undefined`.
+- Every code path in a function with a return type must return.
+
+---
+
+## 推奨 — Lint warnings (still follow)
+
+- **No `console.*`.** `no-console` is `warn` (only `console.warn` / `console.error` are allowed). Use the `logger` util from `@/utils/logger` (`logger.debug/info/warn/error`) — it is `__DEV__`-gated. Do not add raw `console.log`.
+- **Explicit return types on functions** (`explicit-function-return-type` is `warn`, expressions exempt). Match the codebase: named functions and exported hooks declare their return type, e.g. `(): React.JSX.Element`, `(): UseQueryResult<Post[], Error>`, `(): Promise<void>`.
+
+---
+
+## Layer responsibilities (from the actual `src/` tree)
+
+```
+Screen  →  Hook  →  Repository (API via apiClient, TanStack Query)
+                 →  Store (Zustand: client/UI/auth state)
+```
+
+| Layer | Owns | Must NOT |
+|---|---|---|
+| `features/*/screens/*Screen.tsx` | JSX, layout, user events; composes a hook | Call repositories, `apiClient`, or `storage` directly; hold business logic |
+| `features/*/hooks/use-*.ts` | Stateful logic, side effects, combines repo + store + local state | Render JSX |
+| `features/*/repositories/*.repository.ts` | API calls via `apiClient`, response mapping; returns plain data | `useState`/side effects; touch stores or UI |
+| `features/*/store/*.store.ts` & `src/stores/*` | Client/UI/auth state via Zustand; MMKV persistence | Hold server state (that is TanStack Query's job) |
+| `components/ui/*` | Reusable presentational primitives | Navigation, API calls, feature stores |
+| `services/api/*` | Axios instance + interceptors | Business logic |
+
+**Server state vs client state:** TanStack Query owns server state (lists, fetched entities). Zustand owns client state (auth flags, theme, online status). They do not cross.
+
+---
+
+## Established patterns (copy these shapes)
+
+**Repository** — object literal `as const`, methods return domain types, only place that uses `apiClient`:
+```ts
+import { apiClient } from '@/services/api/axios.client';
+import type { ApiResponse } from '@/services/api/api.types';
+
+export const postsRepository = {
+  async getAll(): Promise<Post[]> {
+    const { data } = await apiClient.get<ApiResponse<Post[]>>('/posts');
+    return data.data;
+  },
+} as const;
+```
+
+**Hook (server state)** — thin TanStack Query wrapper with a typed query key and `UseQueryResult` return:
+```ts
+import { useQuery, type UseQueryResult } from '@tanstack/react-query';
+
+const POSTS_QUERY_KEY = ['posts'] as const;
+
+export const usePosts = (): UseQueryResult<Post[], Error> =>
+  useQuery({ queryKey: POSTS_QUERY_KEY, queryFn: postsRepository.getAll });
+```
+
+**Screen** — JSX only, consumes the hook:
+```ts
+export const PostsScreen = (): React.JSX.Element => {
+  const { data, isLoading, error } = usePosts();
+  // JSX only — no axios, no storage, no business logic
+};
+```
+
+**Store (Zustand)** — `create<State & Actions>`, persist via the `storage` util:
+```ts
+import { create } from 'zustand';
+import { storage, StorageKeys } from '@/utils/storage';
+```
+
+**Validation schema** — Zod schema is the source of truth; infer the TS type from it:
+```ts
+import { z } from 'zod';
+
+export const loginSchema = z.object({
+  email: z.email({ error: 'Invalid email address' }),
+  password: z.string().min(8, { error: 'Password must be at least 8 characters' }),
+});
+export type LoginInput = z.infer<typeof loginSchema>;
+```
+
+**Form** — React Hook Form + `zodResolver`, fields via `Controller`:
+```ts
+const { control, handleSubmit, formState: { errors } } =
+  useForm<LoginInput>({ resolver: zodResolver(loginSchema) });
+```
+
+---
+
+## Imports, storage, env
+
+- **Path alias:** `@/` → `src/` (configured in both `tsconfig.json` and `babel.config.js`). Use `@/...` for cross-module imports; relative imports (`../`) are fine **within** a feature.
+- **Storage:** import `{ storage, StorageKeys }` from `@/utils/storage`. **Never import `react-native-mmkv` directly** in feature code. Add new keys to the `StorageKeys` object — never inline string keys.
+- **Env:** read validated env from `@/app/config/env` (`env.API_BASE_URL`, etc.). Env is Zod-validated at startup.
+- **Theme:** `useTheme()` from `@/hooks/use-theme` returns `{ colors, isDark }`. Switch mode via `useThemeStore().setMode('light'|'dark'|'system')`.
+
+---
+
+## Adding a feature (the only correct flow)
+
+Create `src/features/{name}/` with `components/ hooks/ repositories/ screens/ types/`, then:
+
+1. `types/{name}.types.ts` — Zod schemas for inputs, infer types from them.
+2. `repositories/{name}.repository.ts` — API calls via `apiClient`, return plain data.
+3. `hooks/use-{name}.ts` — combine repository + store + local state (TanStack Query for server data).
+4. `screens/{Name}Screen.tsx` — JSX only.
+5. Register the screen in `navigation/AuthNavigator.tsx` or `AppNavigator.tsx`.
+6. Add route params to `navigation/types.ts`.
+
+---
+
+## Before finishing any change
+
+Run (or assume the user will run):
+```bash
+npm run validate   # type-check + lint + format:check
+```
+Generated code must pass all three. This is the CI gate.
