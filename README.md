@@ -2,12 +2,12 @@
 
 A **bare React Native CLI** starter built for developers who let **AI coding agents** write the code.
 It turns your project's architecture rules into **lint and type errors**, so when Claude Code, Cursor, or any agent drifts off-pattern, the build fails instead of the codebase rotting.
-No Expo, no UI-kit / Firebase / Redux lock-in, **New Architecture on from day one** — a small, low-context foundation that's hard for an agent (or a human) to break.
+Minimal and lock-in free — no UI kit, no Firebase, no Redux — so the context an agent reads stays small and harder to drift in. Bare RN CLI with New Architecture verified across every dependency (not Expo — see [How it compares](#how-it-compares)).
 
 ![React Native](https://img.shields.io/badge/React_Native-0.85.3-61DAFB?logo=react&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.8_strict-3178C6?logo=typescript&logoColor=white)
 ![New Architecture](https://img.shields.io/badge/New_Architecture-enabled-22C55E)
-![Expo](https://img.shields.io/badge/Expo-not_required-000020?logo=expo&logoColor=white)
+![AGENTS.md](https://img.shields.io/badge/AGENTS.md-included-0EA5E9)
 ![Agent-friendly](https://img.shields.io/badge/AI_agents-guardrailed-8B5CF6)
 ![License](https://img.shields.io/badge/license-MIT-blue)
 
@@ -32,9 +32,9 @@ This starter makes the rules **non-advisory**. The architecture is encoded as `e
 
 **Why a *bare, minimal* base helps the agent too:** no Firebase, no UI kit, no Redux means a smaller, more predictable context for the model to read — fewer competing patterns to imitate, less to get wrong. The same minimalism that keeps lock-in out keeps the agent on-rails.
 
-The layer responsibilities, allowed imports, and naming rules are all spelled out in [Architecture](#architecture) — point your agent's instructions at it.
+The layer responsibilities, allowed imports, and naming rules live in [`AGENTS.md`](AGENTS.md) — the cross-agent standard read by Cursor, Copilot, Codex, and Claude Code — and in full in [Architecture](#architecture). Point your agent at `AGENTS.md`.
 
-> **Roadmap (not yet in this repo):** machine-readable agent config (`CLAUDE.md` / `AGENTS.md`) encoding these same rules. Tracked under [Non-goals / roadmap](#non-goals); not claimed as a current feature.
+> **Shipped:** machine-readable agent config — [`AGENTS.md`](AGENTS.md) and `CLAUDE.md` in the repo root, `.cursor/rules/architecture.mdc`, and `.github/copilot-instructions.md` — all generated from the same enforced rules, so editor and CLI agents get identical guidance. Task prompt templates: [`docs/ai-prompts/`](docs/ai-prompts/).
 
 ---
 
@@ -47,7 +47,7 @@ This one occupies the middle ground production teams actually need, and adds a g
 - **Enough structure to ship without rewriting** — feature-based directories, typed navigation, a real API client with interceptors, MMKV-backed auth persistence.
 - **Architecture enforced, not suggested** — the layering above isn't a convention you hope everyone follows; it's `error`-level lint + strict types that fail the build. Humans and agents get the same hard stop.
 - **Nothing you'll have to rip out** — no Firebase, no UI-kit lock-in, no state management for cases that don't need it. Everything here earns its place.
-- **New Architecture from day one** — not retrofitted. Every library is New Architecture compatible, so you never hit the "works on old arch, breaks on new arch" wall mid-project.
+- **Every dependency verified New-Architecture-compatible** — New Arch is the default across the ecosystem now; the value here is that nothing in the dependency list will force a painful migration or a "works on old arch, breaks on new arch" wall mid-project.
 
 ---
 
@@ -64,7 +64,7 @@ Positioning, not a leaderboard — pick what fits your project. Star counts and 
 | Lock-in (UI kit / backend / state lib) | **none** | MobX-State-Tree | Nativewind | high (payments, SaaS, admin) |
 | Price | **free (MIT)** | free (MIT) | free (MIT) | $179–499 |
 
-Where each shines: **Ignite** for maturity and generators; **Obytes** if you're happy on Expo + Nativewind; **paid bundles** if you want payments/auth/SaaS pre-built. **This starter** if you want a minimal, Expo-free, New-Architecture base whose structure an AI agent can't quietly dismantle.
+Where each shines: **Ignite** for maturity and generators; **Obytes** if you're happy on Expo + Nativewind; **paid bundles** if you want payments/auth/SaaS pre-built. **This starter** if you want a minimal, agent-guardrailed base — bare RN CLI, no lock-in — whose structure an AI agent can't quietly dismantle. If you'd rather have Expo's tooling and don't need a bare native setup, pick one of the Expo-based options above; that's the right call for most new projects.
 
 ---
 
@@ -744,10 +744,10 @@ API_BASE_URL=api.example.com           # ✗ missing scheme
 No, and the README won't pretend otherwise. Lint and types catch a specific, high-value class of mistakes — circular imports, cross-layer access, `any`, default exports, code that doesn't type-check — *mechanically*, so those never land silently. They do **not** prove logical correctness, catch bad UX, or formally verify architecture (that needs heavier tooling like a hermetic build). Think of it as a guardrail that eliminates the most common structural drift, not a substitute for review or tests.
 
 **Q: Where are the `CLAUDE.md` / `AGENTS.md` files?**  
-Not in this repo yet — it's on the roadmap (see [Non-goals](#non-goals)). The enforcement that matters today lives in `.eslintrc.js` and `tsconfig.json` and runs via `npm run validate`. To guide an agent now, point its system/instructions at the [Architecture](#architecture) section and tell it to run `npm run validate` before committing.
+In the repo root. `AGENTS.md` is the cross-agent source of truth (read by Cursor, Copilot, Codex, Gemini, Claude Code); `CLAUDE.md` is a thin pointer to it. Editor-specific configs live in `.cursor/rules/architecture.mdc` and `.github/copilot-instructions.md`, and task prompt templates in [`docs/ai-prompts/`](docs/ai-prompts/) — all generated from the same enforced rules in `.eslintrc.js` / `tsconfig.json`. Run `npm run validate` before committing.
 
 **Q: Can I use this with Expo?**  
-No. This template targets bare React Native CLI. Expo Managed Workflow imposes constraints (native module whitelist, build pipeline) that are incompatible with the New Architecture module setup here.
+No — this is a bare React Native CLI setup. If Expo fits your project (it's the default most new teams should start with in 2026), use an Expo-based starter instead. This one is for teams that specifically want a bare native New Architecture setup without Expo's managed layer.
 
 **Q: Why MMKV instead of AsyncStorage?**  
 MMKV is synchronous, JSI-based, and 10–30× faster than AsyncStorage on benchmarks. For auth tokens and theme preferences that are read on every app launch, synchronous access eliminates the hydration flicker that AsyncStorage's async reads cause. MMKV v4 uses `createMMKV()` and is New Architecture compatible.
