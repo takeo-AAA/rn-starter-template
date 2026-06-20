@@ -1,24 +1,70 @@
 # RN Starter Template
 
+A **bare React Native CLI** starter built for developers who let **AI coding agents** write the code.
+It turns your project's architecture rules into **lint and type errors**, so when Claude Code, Cursor, or any agent drifts off-pattern, the build fails instead of the codebase rotting.
+Minimal and lock-in free — no UI kit, no Firebase, no Redux — so the context an agent reads stays small and harder to drift in. Bare RN CLI with New Architecture verified across every dependency (not Expo — see [How it compares](#how-it-compares)).
+
 ![React Native](https://img.shields.io/badge/React_Native-0.85.3-61DAFB?logo=react&logoColor=white)
-![TypeScript](https://img.shields.io/badge/TypeScript-5.8-3178C6?logo=typescript&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.8_strict-3178C6?logo=typescript&logoColor=white)
 ![New Architecture](https://img.shields.io/badge/New_Architecture-enabled-22C55E)
+![AGENTS.md](https://img.shields.io/badge/AGENTS.md-included-0EA5E9)
+![Agent-friendly](https://img.shields.io/badge/AI_agents-guardrailed-8B5CF6)
 ![License](https://img.shields.io/badge/license-MIT-blue)
 
-Production-ready React Native 0.85.3 starter template.  
-New Architecture (Fabric + TurboModules + JSI) enabled by default. Zero compromises on type safety.
+> **Honest scope:** lint and types catch the *majority* of agent mistakes — cross-layer edits, circular imports, `any`, default exports, screens reaching into data access — mechanically. They are not a formal architecture prover. This is a lightweight guardrail, not a sandbox. See [Built for AI coding agents](#built-for-ai-coding-agents).
 
 ---
 
-## Why This Template Exists
+## Built for AI coding agents
 
-Most React Native starters fall into one of two traps: they're either a bare CLI output with nothing useful, or they're so loaded with opinions that stripping them costs more than starting fresh.
+AI agents are productive until they quietly break your structure: a screen starts calling a repository directly, a circular import sneaks in, an `any` papers over a real type, and three commits later the layering is gone. The usual fixes — long style guides and PR review — are advisory, and agents (like people) skip them.
 
-This template occupies the middle ground that production teams actually need:
+This starter makes the rules **non-advisory**. The architecture is encoded as `error`-level ESLint rules and `strict` TypeScript, so off-pattern code **fails `npm run validate`** rather than landing silently:
+
+| What agents tend to do | What stops it here | Severity |
+|---|---|---|
+| Call a repository straight from a screen | `import/no-restricted-paths` (`screens/` → `repositories/` blocked) | **error** |
+| Introduce a circular import | `import/no-cycle` (runtime imports only; `import type` exempt) | **error** |
+| Reach for `any` to silence a type | `@typescript-eslint/no-explicit-any` | **error** |
+| Add a `default export`, breaking import consistency | `import/no-default-export` | **error** |
+| Ship code that doesn't actually type-check | `tsc --noEmit` with `strict`, `noUnusedLocals`, `noImplicitReturns` | **error** |
+| Leave a stray `console.log` | `no-console` (`warn`, `error` allowed) | warn |
+
+**Why a *bare, minimal* base helps the agent too:** no Firebase, no UI kit, no Redux means a smaller, more predictable context for the model to read — fewer competing patterns to imitate, less to get wrong. The same minimalism that keeps lock-in out keeps the agent on-rails.
+
+The layer responsibilities, allowed imports, and naming rules live in [`AGENTS.md`](AGENTS.md) — the cross-agent standard read by Cursor, Copilot, Codex, and Claude Code — and in full in [Architecture](#architecture). Point your agent at `AGENTS.md`.
+
+> **Shipped:** machine-readable agent config — [`AGENTS.md`](AGENTS.md) and `CLAUDE.md` in the repo root, `.cursor/rules/architecture.mdc`, and `.github/copilot-instructions.md` — all generated from the same enforced rules, so editor and CLI agents get identical guidance. Task prompt templates: [`docs/ai-prompts/`](docs/ai-prompts/).
+
+---
+
+## Why this starter exists
+
+Most React Native starters fall into one of two traps: a bare CLI output with nothing useful, or so loaded with opinions that stripping them costs more than starting fresh. The free, popular ones (Ignite, Obytes) also assume **Expo** — a different world if you want a bare, native New Architecture setup.
+
+This one occupies the middle ground production teams actually need, and adds a guardrail layer that matters when an agent is at the keyboard:
 
 - **Enough structure to ship without rewriting** — feature-based directories, typed navigation, a real API client with interceptors, MMKV-backed auth persistence.
-- **Nothing you'll have to rip out** — no Firebase, no UI kit lock-in, no opinionated state management for cases that don't need it. Everything here earns its place.
-- **New Architecture from day one** — not retrofitted. All libraries in this template are New Architecture compatible. You won't hit the "works on old arch, breaks on new arch" wall mid-project.
+- **Architecture enforced, not suggested** — the layering above isn't a convention you hope everyone follows; it's `error`-level lint + strict types that fail the build. Humans and agents get the same hard stop.
+- **Nothing you'll have to rip out** — no Firebase, no UI-kit lock-in, no state management for cases that don't need it. Everything here earns its place.
+- **Every dependency verified New-Architecture-compatible** — New Arch is the default across the ecosystem now; the value here is that nothing in the dependency list will force a painful migration or a "works on old arch, breaks on new arch" wall mid-project.
+
+---
+
+## How it compares
+
+Positioning, not a leaderboard — pick what fits your project. Star counts and prices are point-in-time and will drift.
+
+| | This starter | Ignite | Obytes | Paid bundles ($179–499) |
+|---|---|---|---|---|
+| Base | **bare RN CLI (no Expo)** | Expo (bare possible) | Expo + Expo Router | Expo / RN |
+| New Architecture | **assumed, day one** | depends on RN version | depends on Expo SDK | varies |
+| Architecture enforced by lint/types as `error` | **yes** (no-cycle, no-default-export, no-any, screen→repo) | no | no | varies |
+| Built around AI agents writing the code | **yes (core thesis)** | not a focus | `claude.md` included | some market to "AI founders" |
+| Lock-in (UI kit / backend / state lib) | **none** | MobX-State-Tree | Nativewind | high (payments, SaaS, admin) |
+| Price | **free (MIT)** | free (MIT) | free (MIT) | $179–499 |
+
+Where each shines: **Ignite** for maturity and generators; **Obytes** if you're happy on Expo + Nativewind; **paid bundles** if you want payments/auth/SaaS pre-built. **This starter** if you want a minimal, agent-guardrailed base — bare RN CLI, no lock-in — whose structure an AI agent can't quietly dismantle. If you'd rather have Expo's tooling and don't need a bare native setup, pick one of the Expo-based options above; that's the right call for most new projects.
 
 ---
 
@@ -32,26 +78,39 @@ This template occupies the middle ground that production teams actually need:
 | **Named exports only** | `import/no-default-export` — consistent import style, better tree-shaking, easier refactors. |
 | **Screens are dumb** | Business logic lives in hooks, not JSX. Screens receive state and handlers; they never call repositories directly. |
 | **Server state ≠ client state** | TanStack Query owns server state. Zustand owns UI state. They do not cross. |
-| **No console.log in production** | `logger` util is gated on `__DEV__`. Nothing leaks to production logs. |
+| **No console.log in production** | `no-console` lints `console.*` (`warn`, `error` allowed); the `logger` util is gated on `__DEV__` so nothing leaks to production logs. |
 | **Env validation at startup** | Zod validates all env vars before the app mounts. Missing vars crash fast with a readable error, not a mysterious `undefined` deeper in the stack. |
 
 ---
 
 ## Features
 
-- **New Architecture** — Fabric renderer, TurboModules, JSI. Enabled by default in both Android and iOS.
-- **Typed Navigation** — React Navigation 7 with `RootStackParamList`, `AuthStackParamList`, `AppTabParamList`. Navigation is type-safe end to end.
-- **Auth Flow** — Splash → MMKV hydration → authenticated or unauthenticated stack. Token persistence survives app restarts.
-- **API Client** — Axios with request/response interceptors: `Authorization` header injection, `401` auto-clear, dev-only logging.
-- **Server State** — TanStack Query v5 with typed query keys and `UseQueryResult<T>` return types.
-- **Client State** — Zustand v5 for auth state and global UI state. Auth store persists to MMKV.
-- **Form Validation** — React Hook Form + Zod v4. Schema-first validation. `loginSchema` is the source of truth for both runtime validation and TypeScript types.
-- **Storage** — MMKV v4 via a typed wrapper. All storage keys are centralized in `StorageKeys` enum. Never import MMKV directly in features.
-- **Theme** — Light/dark/system modes. Color tokens typed as `ColorTokens`. Persisted to MMKV. Zero flash on cold start.
-- **Error Boundary** — Top-level `ErrorBoundary` catches render errors and prevents blank screens.
-- **Path Aliases** — `@/` resolves to `src/`. Configured in both TypeScript (`tsconfig.json`) and Babel (`babel-plugin-module-resolver`).
-- **Hermes** — Enabled on Android. Faster startup, lower memory.
-- **Dev Mocks** — Axios interceptors mock auth endpoints and `/posts` in dev mode. The app runs without a real backend out of the box.
+Ordered by what you get out of it, not by where it lives in the tree.
+
+**Stay on-pattern automatically**
+- **Enforced architecture** — `error`-level ESLint (`import/no-cycle`, `import/no-default-export`, `@typescript-eslint/no-explicit-any`, `screens/` → `repositories/` blocked) plus `strict` TypeScript. Off-pattern code fails `npm run validate`; you (or your agent) find out at commit time, not in review.
+- **One command to verify everything** — `npm run validate` runs type-check + lint + format. Green means the structure held.
+
+**Skip the boring setup**
+- **Working auth flow, end to end** — Splash → MMKV hydration → authenticated/unauthenticated stacks. Token persistence survives restarts. Wire your endpoints and go.
+- **Runs without a backend** — Axios adapter mocks `/auth/login`, `/auth/logout`, and `/posts` in dev, so the app boots and the flows work on a fresh clone.
+- **Real API client included** — Axios with request/response interceptors: `Authorization` header injection, `401` auto-clear, dev-only logging.
+- **Fail-fast config** — Zod validates all env vars at startup; a missing/malformed var crashes with a readable error instead of a silent `undefined` deep in the stack.
+
+**Type-safe by default**
+- **Typed navigation** — React Navigation 7 with `RootStackParamList`, `AuthStackParamList`, `AppTabParamList`. Route params are checked end to end.
+- **Schema-first forms** — React Hook Form + Zod v4; `loginSchema` is the single source for both runtime validation and inferred TypeScript types.
+- **Server vs client state, separated** — TanStack Query v5 (typed query keys, `UseQueryResult<T>`) for server state; Zustand v5 for auth and UI state. They don't cross.
+
+**Fast and predictable at runtime**
+- **New Architecture** — Fabric, TurboModules, JSI enabled by default on Android and iOS; all libraries chosen for compatibility.
+- **MMKV storage** — synchronous, JSI-based, via a typed wrapper with a central `StorageKeys` enum. No hydration flicker, no raw MMKV imports in features.
+- **Theme that doesn't flash** — light/dark/system modes, `ColorTokens`-typed palette, persisted to MMKV and restored before first paint.
+- **Hermes** — enabled on Android for faster startup and lower memory.
+
+**Quality-of-life**
+- **Error boundary** — top-level `ErrorBoundary` catches render errors and prevents blank screens.
+- **Path aliases** — `@/` → `src/`, configured in both `tsconfig.json` and Babel.
 
 ---
 
@@ -75,15 +134,13 @@ This template occupies the middle ground that production teams actually need:
 
 ## Screenshots
 
-> Coming soon. Screenshots will be added after v1.0.0 release build.
->
-> Planned: Login screen, Home (list), Settings (light), Settings (dark).
+> Not captured yet. Drop PNGs into `docs/screenshots/` and uncomment the block below.
+> Planned set: Login, Home (list), Settings (light), Settings (dark).
 
-<!-- Add images here once available:
-![Login](docs/screenshots/login-light.png)
-![Home](docs/screenshots/home-light.png)
-![Settings Light](docs/screenshots/settings-light.png)
-![Settings Dark](docs/screenshots/settings-dark.png)
+<!-- Uncomment once the files exist in docs/screenshots/:
+| Login | Home | Settings (light) | Settings (dark) |
+|---|---|---|---|
+| ![Login](docs/screenshots/login-light.png) | ![Home](docs/screenshots/home-light.png) | ![Settings light](docs/screenshots/settings-light.png) | ![Settings dark](docs/screenshots/settings-dark.png) |
 -->
 
 ---
@@ -103,9 +160,14 @@ git init
 # Both options: install and configure
 npm install
 cp .env.example .env.development
+
+# Confirm the guardrails pass on a clean checkout
+npm run validate
 ```
 
-Edit `.env.development` — then proceed to platform-specific setup below.
+Edit `.env.development`, then continue to platform-specific setup below.
+
+**Using an AI agent?** Point its instructions at the [Architecture](#architecture) and [Built for AI coding agents](#built-for-ai-coding-agents) sections, and have it run `npm run validate` before every commit — that's the gate that keeps generated code on-pattern.
 
 ---
 
@@ -363,14 +425,16 @@ Screens never call repositories directly. Hooks are the boundary between UI and 
 
 ### Enforced Rules
 
-**ESLint (errors, not warnings):**
+**ESLint:**
 
-| Rule | Effect |
-|---|---|
-| `import/no-cycle` | Runtime circular imports are build errors. `import type` is exempt (`ignoreTypeImports: true`) — type-only imports create no runtime dependency |
-| `import/no-default-export` | Named exports only across the codebase |
-| `@typescript-eslint/no-explicit-any` | Use `unknown`; `any` fails lint |
-| `no-console` | Use `logger` util; `console.*` fails lint |
+| Rule | Severity | Effect |
+|---|---|---|
+| `import/no-restricted-paths` | error | `screens/` cannot import `repositories/` — screens go through hooks, never straight to data access |
+| `import/no-cycle` | error | Runtime circular imports fail the build. Type-only imports don't count: `consistent-type-imports` forces `import type`, which carries no runtime dependency |
+| `import/no-default-export` | error | Named exports only across the codebase |
+| `@typescript-eslint/no-explicit-any` | error | Use `unknown`; `any` fails lint |
+| `@typescript-eslint/consistent-type-imports` | error | Type imports must use `import type` |
+| `no-console` | warn | Use the `logger` util; `console.*` (except `warn`/`error`) is flagged |
 
 **TypeScript (`tsconfig.json`):**
 
@@ -676,8 +740,14 @@ API_BASE_URL=api.example.com           # ✗ missing scheme
 
 ## FAQ
 
+**Q: Does "built for AI agents" mean the agent can't write bad code?**  
+No, and the README won't pretend otherwise. Lint and types catch a specific, high-value class of mistakes — circular imports, cross-layer access, `any`, default exports, code that doesn't type-check — *mechanically*, so those never land silently. They do **not** prove logical correctness, catch bad UX, or formally verify architecture (that needs heavier tooling like a hermetic build). Think of it as a guardrail that eliminates the most common structural drift, not a substitute for review or tests.
+
+**Q: Where are the `CLAUDE.md` / `AGENTS.md` files?**  
+In the repo root. `AGENTS.md` is the cross-agent source of truth (read by Cursor, Copilot, Codex, Gemini, Claude Code); `CLAUDE.md` is a thin pointer to it. Editor-specific configs live in `.cursor/rules/architecture.mdc` and `.github/copilot-instructions.md`, and task prompt templates in [`docs/ai-prompts/`](docs/ai-prompts/) — all generated from the same enforced rules in `.eslintrc.js` / `tsconfig.json`. Run `npm run validate` before committing.
+
 **Q: Can I use this with Expo?**  
-No. This template targets bare React Native CLI. Expo Managed Workflow imposes constraints (native module whitelist, build pipeline) that are incompatible with the New Architecture module setup here.
+No — this is a bare React Native CLI setup. If Expo fits your project (it's the default most new teams should start with in 2026), use an Expo-based starter instead. This one is for teams that specifically want a bare native New Architecture setup without Expo's managed layer.
 
 **Q: Why MMKV instead of AsyncStorage?**  
 MMKV is synchronous, JSI-based, and 10–30× faster than AsyncStorage on benchmarks. For auth tokens and theme preferences that are read on every app launch, synchronous access eliminates the hydration flicker that AsyncStorage's async reads cause. MMKV v4 uses `createMMKV()` and is New Architecture compatible.
