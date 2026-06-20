@@ -17,66 +17,54 @@ export const apiClient: AxiosInstance = axios.create({
 
 // Dev-only mock: intercept auth endpoints that don't exist on jsonplaceholder
 if (__DEV__) {
+  const mockData: Record<string, unknown> = {
+    '/auth/login': {
+      data: {
+        user: { id: '1', email: 'test@example.com', name: 'Test User' },
+        tokens: { accessToken: 'mock-access-token', refreshToken: 'mock-refresh-token' },
+      },
+    },
+    '/auth/logout': { data: null },
+    '/posts': [
+      {
+        id: '1',
+        title: 'Starter Template Demo',
+        body: 'React Native 0.85.3 with New Architecture',
+        userId: '1',
+      },
+      {
+        id: '2',
+        title: 'TypeScript Strict Mode',
+        body: 'Zero errors, full type safety across the codebase',
+        userId: '1',
+      },
+      {
+        id: '3',
+        title: 'TanStack Query v5',
+        body: 'Server state management with stale-while-revalidate',
+        userId: '1',
+      },
+      {
+        id: '4',
+        title: 'Zustand v5 Stores',
+        body: 'Minimal client state with MMKV persistence',
+        userId: '1',
+      },
+      {
+        id: '5',
+        title: 'React Navigation v7',
+        body: 'Type-safe navigation with typed param lists',
+        userId: '1',
+      },
+    ],
+  };
+
   apiClient.interceptors.request.use(
     (config: InternalAxiosRequestConfig): InternalAxiosRequestConfig => {
       const url = config.url ?? '';
-      if (url === '/auth/login') {
+      if (url in mockData) {
         config.adapter = async () => ({
-          data: {
-            data: {
-              user: { id: '1', email: 'test@example.com', name: 'Test User' },
-              tokens: { accessToken: 'mock-access-token', refreshToken: 'mock-refresh-token' },
-            },
-          },
-          status: 200,
-          statusText: 'OK',
-          headers: {},
-          config,
-        });
-      }
-      if (url === '/auth/logout') {
-        config.adapter = async () => ({
-          data: { data: null },
-          status: 200,
-          statusText: 'OK',
-          headers: {},
-          config,
-        });
-      }
-      if (url === '/posts') {
-        config.adapter = async () => ({
-          data: [
-            {
-              id: '1',
-              title: 'Starter Template Demo',
-              body: 'React Native 0.85.3 with New Architecture',
-              userId: '1',
-            },
-            {
-              id: '2',
-              title: 'TypeScript Strict Mode',
-              body: 'Zero errors, full type safety across the codebase',
-              userId: '1',
-            },
-            {
-              id: '3',
-              title: 'TanStack Query v5',
-              body: 'Server state management with stale-while-revalidate',
-              userId: '1',
-            },
-            {
-              id: '4',
-              title: 'Zustand v5 Stores',
-              body: 'Minimal client state with MMKV persistence',
-              userId: '1',
-            },
-            {
-              id: '5',
-              title: 'React Navigation v7',
-              body: 'Type-safe navigation with typed param lists',
-              userId: '1',
-            },
-          ],
+          data: mockData[url],
           status: 200,
           statusText: 'OK',
           headers: {},
